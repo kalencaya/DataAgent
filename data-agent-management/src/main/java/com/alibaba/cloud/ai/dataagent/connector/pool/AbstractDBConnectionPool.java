@@ -53,6 +53,7 @@ public abstract class AbstractDBConnectionPool implements DBConnectionPool {
 		return String.format("SELECT count(*) FROM information_schema.schemata WHERE schema_name = '%s'", schema);
 	}
 
+	@Override
 	public ErrorCodeEnum ping(DbConfigBO config) {
 		String jdbcUrl = config.getUrl();
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, config.getUsername(), config.getPassword());
@@ -78,6 +79,7 @@ public abstract class AbstractDBConnectionPool implements DBConnectionPool {
 		}
 	}
 
+	@Override
 	public Connection getConnection(DbConfigBO config) {
 
 		String jdbcUrl = config.getUrl();

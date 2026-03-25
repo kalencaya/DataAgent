@@ -33,7 +33,9 @@ public enum DatabaseDialectEnum {
 
 	ORACLE("Oracle"),
 
-	HIVE("Hive");
+	HIVE("Hive"),
+
+	MAX_COMPUTE("Max_Compute");
 
 	public final String code;
 

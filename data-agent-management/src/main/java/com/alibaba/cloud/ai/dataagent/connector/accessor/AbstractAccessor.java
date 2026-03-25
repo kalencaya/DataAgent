@@ -45,6 +45,7 @@ public abstract class AbstractAccessor implements Accessor {
 
 	private final DBConnectionPool dbConnectionPool;
 
+	@Override
 	public <T> T accessDb(DbConfigBO dbConfig, String method, DbQueryParameter param) throws Exception {
 
 		try (Connection connection = getConnection(dbConfig)) {
@@ -82,38 +83,47 @@ public abstract class AbstractAccessor implements Accessor {
 		}
 	}
 
+	@Override
 	public List<DatabaseInfoBO> showDatabases(DbConfigBO dbConfig) throws Exception {
 		return accessDb(dbConfig, "showDatabases", null);
 	}
 
+	@Override
 	public List<SchemaInfoBO> showSchemas(DbConfigBO dbConfig) throws Exception {
 		return accessDb(dbConfig, "showSchemas", null);
 	}
 
+	@Override
 	public List<TableInfoBO> showTables(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "showTables", param);
 	}
 
+	@Override
 	public List<TableInfoBO> fetchTables(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "fetchTables", param);
 	}
 
+	@Override
 	public List<ColumnInfoBO> showColumns(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "showColumns", param);
 	}
 
+	@Override
 	public List<ForeignKeyInfoBO> showForeignKeys(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "showForeignKeys", param);
 	}
 
+	@Override
 	public List<String> sampleColumn(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "sampleColumn", param);
 	}
 
+	@Override
 	public ResultSetBO scanTable(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "scanTable", param);
 	}
 
+	@Override
 	public ResultSetBO executeSqlAndReturnObject(DbConfigBO dbConfig, DbQueryParameter param) throws Exception {
 		return accessDb(dbConfig, "executeSqlAndReturnObject", param);
 	}

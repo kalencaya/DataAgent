@@ -53,7 +53,7 @@ public enum BizDataSourceTypeEnum {
 
 	ADB_PG(21, "adg_pg", DatabaseDialectEnum.POSTGRESQL.getCode(), DbAccessTypeEnum.DATA_API.getCode()),
 
-	MAX_COMPUTE(31, "max_compute", DatabaseDialectEnum.MYSQL.getCode(), DbAccessTypeEnum.JDBC.getCode()),
+	MAX_COMPUTE(31, "max_compute", DatabaseDialectEnum.MAX_COMPUTE.getCode(), DbAccessTypeEnum.JDBC.getCode()),
 	// SQLite simulated database in function computation
 	FC_MEMORY_DB(41, "fc_memory_db", DatabaseDialectEnum.SQLite.getCode(), DbAccessTypeEnum.FC_HTTP.getCode()),
 
