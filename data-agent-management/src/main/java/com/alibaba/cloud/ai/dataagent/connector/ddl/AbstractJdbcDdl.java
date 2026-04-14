@@ -24,6 +24,7 @@ import com.alibaba.cloud.ai.dataagent.bo.schema.TableInfoBO;
 import com.alibaba.cloud.ai.dataagent.util.SqlUtil;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.List;
 
 public abstract class AbstractJdbcDdl implements Ddl {
@@ -38,6 +39,10 @@ public abstract class AbstractJdbcDdl implements Ddl {
 	public abstract List<TableInfoBO> fetchTables(Connection connection, String schema, List<String> tables);
 
 	public abstract List<ColumnInfoBO> showColumns(Connection connection, String schema, String table);
+
+	public List<ColumnInfoBO> showPartitionColumns(Connection connection, String schema, String table) {
+		return Collections.emptyList();
+	}
 
 	public abstract List<ForeignKeyInfoBO> showForeignKeys(Connection connection, String schema, List<String> tables);
 

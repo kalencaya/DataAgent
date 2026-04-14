@@ -19,6 +19,7 @@ import com.alibaba.cloud.ai.dataagent.bo.schema.*;
 import com.alibaba.cloud.ai.dataagent.connector.SqlExecutor;
 import com.alibaba.cloud.ai.dataagent.connector.ddl.AbstractJdbcDdl;
 import com.alibaba.cloud.ai.dataagent.enums.BizDataSourceTypeEnum;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -152,6 +153,58 @@ public class MaxComputeJdbcDdl extends AbstractJdbcDdl {
 			FROM information_schema.columns
 			WHERE table_schema = '%s'
 			  AND table_name = '%s'
+			  AND is_partition_key = false
+			; 
+			""";
+
+		String sql = String.format(sql_template, schema, table);
+
+		List<ColumnInfoBO> columnInfoList = Lists.newArrayList();
+		try {
+			String[][] resultArr = SqlExecutor.executeSqlAndReturnArr(connection, sql);
+			if (resultArr.length <= 1) {
+				return Lists.newArrayList();
+			}
+
+			for (int i = 1; i < resultArr.length; i++) {
+				if (resultArr[i].length < 2) {
+					continue;
+				}
+
+				String colName = resultArr[i][0];
+				String dataType = resultArr[i][1];
+				String comment = resultArr[i].length >= 3 ? resultArr[i][2] : "";
+
+				if (StringUtils.isBlank(colName) || colName.startsWith("#")) {
+					continue;
+				}
+
+				columnInfoList.add(ColumnInfoBO.builder()
+					.name(colName)
+					.description(comment)
+					.type(wrapType(dataType))
+					.primary(false) // Hive 不支持主键
+					.notnull(false) // Hive 不强制非空约束
+					.build());
+			}
+		}
+		catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+		return columnInfoList;
+	}
+
+	@Override
+	public List<ColumnInfoBO> showPartitionColumns(Connection connection, String schema, String table) {
+		String sql_template = """
+			SELECT column_name,data_type,column_comment
+			FROM information_schema.columns
+			WHERE table_schema = '%s'
+			  AND table_name = '%s'
+			  AND is_partition_key = true
+			  ORDER BY ordinal_position
+			  LIMIT 1
 			; 
 			""";
 
@@ -201,7 +254,19 @@ public class MaxComputeJdbcDdl extends AbstractJdbcDdl {
 	@Override
 	public List<String> sampleColumn(Connection connection, String schema, String table, String column) {
 		String fullTableName = StringUtils.isNotBlank(schema) ? schema + "." + table : table;
-		String sql = String.format("SELECT `%s` FROM %s LIMIT 99", column, fullTableName);
+		String sql_template = """
+			SELECT `%s` FROM %s
+			""";
+		// 获取分区键
+		List<ColumnInfoBO> columnInfoBOS = showPartitionColumns(connection, schema, table);
+		if (CollectionUtils.isNotEmpty(columnInfoBOS)) {
+			ColumnInfoBO columnInfoBO = columnInfoBOS.get(0);
+			sql_template += " WHERE " + columnInfoBO.getName() + " = " +
+				String.format("MAX_PT('%s')", fullTableName) + " LIMIT 99;";
+		} else {
+			sql_template += " LIMIT 99;";
+		}
+		String sql = String.format(sql_template, column, fullTableName);
 
 		List<String> sampleInfo = Lists.newArrayList();
 		try {
@@ -229,7 +294,20 @@ public class MaxComputeJdbcDdl extends AbstractJdbcDdl {
 	@Override
 	public ResultSetBO scanTable(Connection connection, String schema, String table) {
 		String fullTableName = StringUtils.isNotBlank(schema) ? schema + "." + table : table;
-		String sql = String.format("SELECT * FROM %s LIMIT 20", fullTableName);
+		String sql_template = """
+			SELECT * FROM %s
+			""";
+		// 获取分区键
+		List<ColumnInfoBO> columnInfoBOS = showPartitionColumns(connection, schema, table);
+		if (CollectionUtils.isNotEmpty(columnInfoBOS)) {
+			ColumnInfoBO columnInfoBO = columnInfoBOS.get(0);
+			sql_template += " WHERE " + columnInfoBO.getName() + " = " +
+				String.format("MAX_PT('%s')", fullTableName) + " LIMIT 20;";
+		} else {
+			sql_template += " LIMIT 20;";
+		}
+
+		String sql = String.format(sql_template, fullTableName);
 
 		ResultSetBO resultSet = ResultSetBO.builder().build();
 		try {

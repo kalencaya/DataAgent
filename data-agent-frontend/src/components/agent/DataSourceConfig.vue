@@ -72,22 +72,9 @@
               </el-button>
             </div>
 
-            <div v-if="tableLists[scope.row.id] && tableLists[scope.row.id].length > 0">
-              <el-checkbox-group v-model="selectedTables[scope.row.id]">
-                <el-row :gutter="10">
-                  <el-col
-                    v-for="table in tableLists[scope.row.id]"
-                    :key="table"
-                    :span="6"
-                    style="margin-bottom: 10px"
-                  >
-                    <el-checkbox :label="table" size="large">
-                      {{ table }}
-                    </el-checkbox>
-                  </el-col>
-                </el-row>
-              </el-checkbox-group>
 
+
+            <div v-if="tableLists[scope.row.id] && tableLists[scope.row.id].length > 0">
               <div style="margin-top: 20px; text-align: right">
                 <el-button
                   @click="updateDatasourceTables(scope.row)"
@@ -111,6 +98,21 @@
                   清空
                 </el-button>
               </div>
+
+              <el-checkbox-group v-model="selectedTables[scope.row.id]">
+                <el-row :gutter="10">
+                  <el-col
+                    v-for="table in tableLists[scope.row.id]"
+                    :key="table"
+                    :span="6"
+                    style="margin-bottom: 10px"
+                  >
+                    <el-checkbox :label="table" size="large">
+                      {{ table }}
+                    </el-checkbox>
+                  </el-col>
+                </el-row>
+              </el-checkbox-group>
             </div>
             <div
               v-else-if="tableLoadingStates[scope.row.id]"
